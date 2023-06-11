@@ -1,0 +1,54 @@
+<html>
+    <head>
+        <title>Chat Example</title>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+        
+    </head>
+    <body>
+        <h1>Simple chat app</h1>
+        <p>
+            <input id="aliasText" type="'text"/>
+            <button id="aliasBtn">Set Nick name</button>
+        </p>
+        <textarea style="height:300px;width:500px;"></textarea>
+        <p>
+            <input id="chatMsgText" type="text"/>
+            <button id="chatMsgBtn">Send Message</button>
+        </p>
+        <h2>Active participants <b id="totalUsers"></b></h2>
+        <p id="activeUsers">
+
+        </p>
+    </body>
+    <script>
+        var socket = io.connect();
+        // change name and send chat
+        $(()=>{
+            $('#aliasBtn').on('click',()=>{
+                socket.emit('setName',$('#aliasText').val());
+                $('#aliasBtn').html('Name Changed');
+            })
+            /* document.getElementById('aliasBtn').addEventListener('click',()=>{
+                socket.emit('setName',
+                document.getElementById('aliasText').innerHTML);
+            }) */
+            $('#chatMsgBtn').on('click',()=>{
+                socket.emit('newMsg',{
+                    message:$('#chatMsgText').val()
+                })
+                $('#chatMsgBtn').html('msg Sent,type again!');
+            })
+        })
+        socket.on('updateChat',(chatdata)=>{
+            var newMsg = chatdata.sender +'('+chatdata.location +')'+ '-' + chatdata.message;
+            $('textarea').val($('textarea').val() + '\n' +newMsg);
+        })
+        socket.on('connections',(users)=>{
+            $('#activeUsers').html(users);
+            document.getElementById('totalUsers').innerHTML = users.length
+        })
+        
+
+    </script>
+</html>
